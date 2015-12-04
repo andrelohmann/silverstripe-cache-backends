@@ -1,0 +1,25 @@
+{
+    "name": "andrelohmann-silverstripe/cache-backends",
+    "description": "Additional Cache Backends for Redis and MongoDB",
+    "license": "BSD-3-Clause",
+    "keywords": ["silverstripe", "framework"],
+    "authors": [
+        {
+            "name": "Andre Lohmann",
+            "homepage": "https://github.com/andrelohmann"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "composer/installers": "*"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "cp vendor/andrelohmann-silverstripe/cache-backends/* -r framework/"
+        ],
+        "post-update-cmd": [
+            "cp vendor/andrelohmann-silverstripe/cache-backends/* -r framework/"
+        ]
+    },
+    "minimum-stability": "stable"
+}
