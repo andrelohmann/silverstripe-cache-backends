@@ -95,10 +95,23 @@ class Zend_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
         }
 
         parent::__construct($options);
-		
+
         $this->_redis = new Redis();
 
-        // setup memcached client options
+
+		$server = array();
+
+		$server = $this->_options['server'];
+		if (!array_key_exists('port', $server)){
+			$server['port'] = self::DEFAULT_PORT;
+        }
+		if (!array_key_exists('timeout', $server)) {
+            $server['timeout'] = self::DEFAULT_TIMEOUT;
+        }
+
+		$this->_redis->connect($server['host'], $server['port'], $server['timeout']);
+
+        // setup redis client options this occurs after connection due to this https://github.com/phpredis/phpredis/issues/504
         foreach ($this->_options['client'] as $name => $value) {
             $optId = null;
             if (is_int($name)) {
@@ -117,18 +130,6 @@ class Zend_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
                 }
             }
         }
-		
-		$server = array();
-		
-		$server = $this->_options['server'];
-		if (!array_key_exists('port', $server)){
-			$server['port'] = self::DEFAULT_PORT;
-        }
-		if (!array_key_exists('timeout', $server)) {
-            $server['timeout'] = self::DEFAULT_TIMEOUT;
-        }
-		
-		$this->_redis->connect($server['host'], $server['port'], $server['timeout']);
     }
 
     /**
