@@ -95,31 +95,10 @@ class Zend_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
         }
 
         parent::__construct($options);
-		
+
         $this->_redis = new Redis();
 
-        // setup memcached client options
-        foreach ($this->_options['client'] as $name => $value) {
-            $optId = null;
-            if (is_int($name)) {
-                $optId = $name;
-            } else {
-                $optConst = 'Redis::OPT_' . strtoupper($name);
-                if (defined($optConst)) {
-                    $optId = constant($optConst);
-                } else {
-                    $this->_log("Unknown redis client option '{$name}' ({$optConst})");
-                }
-            }
-            if ($optId) {
-                if (!$this->_redis->setOption($optId, $value)) {
-                    $this->_log("Setting redis client option '{$optId}' failed");
-                }
-            }
-        }
-		
-		$server = array();
-		
+		// Setup server configuration.
 		$server = $this->_options['server'];
 		if (!array_key_exists('port', $server)){
 			$server['port'] = self::DEFAULT_PORT;
@@ -127,8 +106,29 @@ class Zend_Cache_Backend_Redis extends Zend_Cache_Backend implements Zend_Cache_
 		if (!array_key_exists('timeout', $server)) {
             $server['timeout'] = self::DEFAULT_TIMEOUT;
         }
-		
+
+		// Connect to server before configuring client options.
 		$this->_redis->connect($server['host'], $server['port'], $server['timeout']);
+
+		// Dynamically configure client options (looking for matches against Redis::OPT_ constants as well).
+		foreach ($this->_options['client'] as $name => $value) {
+			$optId = null;
+			if (is_int($name)) {
+				$optId = $name;
+			} else {
+				$optConst = 'Redis::OPT_' . strtoupper($name);
+				if (defined($optConst)) {
+					$optId = constant($optConst);
+				} else {
+					$this->_log("Unknown redis client option '{$name}' ({$optConst})");
+				}
+			}
+			if ($optId) {
+				if (!$this->_redis->setOption($optId, $value)) {
+					$this->_log("Setting redis client option '{$optId}' failed");
+				}
+			}
+		}
     }
 
     /**
